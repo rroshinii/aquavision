@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AquaVision: Intelligent Underwater Object Detection</title>
+<meta name="description" content="AI-powered underwater vision for smarter marine monitoring, exploration, conservation, and infrastructure inspection.">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="top">
+    <a class="brand" href="/"><svg viewBox="0 0 32 32" fill="none" stroke="#6fd6c4" stroke-width="2"><circle cx="16" cy="16" r="13"/><circle cx="16" cy="16" r="7"/><path d="M16 16 26 8"/></svg>AquaVision</a>
+    <a class="btn small" href="/app">Dashboard</a>
+  </div>
+  <div class="bubbles" aria-hidden="true" id="bubbles"></div>
+  <svg class="sonar" viewBox="-100 -100 200 200" aria-hidden="true">
+    <circle class="ring" r="96"/><circle class="ring" r="72"/><circle class="ring" r="48"/><circle class="ring" r="24"/>
+    <circle class="ping" r="96"/><circle class="ping" r="96"/><circle class="ping" r="96"/>
+    <line class="ring" x1="-96" y1="0" x2="96" y2="0"/><line class="ring" x1="0" y1="-96" x2="0" y2="96"/>
+    <g class="sweep"><path d="M0 0 L96 0 A96 96 0 0 0 83 -48 Z" fill="#6fd6c4" opacity=".16"/></g>
+    <g class="contact"><path d="M24 -64 h-14 v14 M44 -64 h14 v14 M24 -30 h-14 v-14 M44 -30 h14 v-14" transform="translate(8 8)"/></g>
+    <g class="contact"><path d="M-70 20 h-12 v12 M-40 20 h12 v12 M-70 48 h-12 v-12 M-40 48 h12 v-12"/></g>
+    <g class="contact"><path d="M20 40 h-10 v10 M60 40 h10 v10 M20 70 h-10 v-10 M60 70 h10 v-10"/></g>
+  </svg>
+  <div class="hero-copy">
+    <h1>AquaVision</h1>
+    <div class="sub">Intelligent Underwater Object Detection</div>
+    <p class="lede">AI-powered underwater vision for smarter marine monitoring, exploration, conservation, and infrastructure inspection.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="/app#/image">Start Detection</a>
+      <a class="btn" href="/app#/overview">Explore Dashboard</a>
+    </div>
+  </div>
+</header>
+
+<section class="section" id="features">
+  <h2>One pipeline for every kind of underwater footage</h2>
+  <p class="intro">Photos, recorded dives and live camera feeds all run through the same trained model.</p>
+  <div class="features">
+    <div class="feature"><h3>AI Object Detection</h3><p>Detect and classify underwater objects using the existing trained ML model.</p></div>
+    <div class="feature"><h3>Image Analysis</h3><p>Upload underwater images and receive annotated detection results.</p></div>
+    <div class="feature"><h3>Video Analysis</h3><p>Analyze underwater videos frame-by-frame.</p></div>
+    <div class="feature"><h3>Live Detection</h3><p>Use a connected camera/webcam for real-time detection.</p></div>
+    <div class="feature"><h3>Marine Monitoring</h3><p>Support biodiversity and environmental monitoring.</p></div>
+    <div class="feature"><h3>Infrastructure Inspection</h3><p>Assist with inspection of submerged structures.</p></div>
+  </div>
+</section>
+
+<div class="band"><section class="section" id="how">
+  <h2>How it works</h2>
+  <p class="intro">Four steps from raw footage to measurable results.</p>
+  <ol class="steps">
+    <li><h3>Upload / Capture</h3><p>Drop in an underwater image or video, or switch on a camera.</p></li>
+    <li><h3>Enhance</h3><p>Optional colour-cast correction, contrast boost and denoising to fight turbidity and low light.</p></li>
+    <li><h3>Detect</h3><p>The YOLO model finds objects and draws labelled boxes with confidence scores.</p></li>
+    <li><h3>Analyze</h3><p>Review counts, confidence and history, then download the annotated result.</p></li>
+  </ol>
+</section></div>
+
+<section class="section" id="classes">
+  <h2>Supported detection</h2>
+  <p class="intro">This list is read from the model currently loaded by the server, not written by hand.</p>
+  <div id="model-state" class="muted">Loading model information…</div>
+  <div class="chips" id="chips"></div>
+  <div id="model-note"></div>
+</section>
+
+<section class="cta">
+  <h2>Start Exploring Underwater Intelligence</h2>
+  <a class="btn primary" href="/app">Launch AquaVision</a>
+</section>
+<footer>AquaVision &middot; CS5305 Machine Learning project &middot; Chennai Institute of Technology</footer>
+
+<script>
+(function(){
+  const b=document.getElementById('bubbles');
+  for(let i=0;i<14;i++){const s=document.createElement('span'),z=6+Math.random()*18;
+    s.style.cssText=`left:${Math.random()*100}%;width:${z}px;height:${z}px;animation-duration:${9+Math.random()*12}s;animation-delay:-${Math.random()*14}s`;b.appendChild(s);}
+  fetch('/api/model').then(r=>r.json().then(j=>({ok:r.ok,j}))).then(({ok,j})=>{
+    const st=document.getElementById('model-state');
+    if(!ok){st.textContent='';document.getElementById('model-note').innerHTML='<div class="notice">The model is not available right now: '+(j.error||'unknown error')+'</div>';return;}
+    st.textContent='Model: '+j.weights+' · running on '+j.device.toUpperCase()+' · '+j.classes.length+' class'+(j.classes.length===1?'':'es')+' reported';
+    document.getElementById('chips').innerHTML=j.classes.map(c=>'<span class="chip"></span>').join('');
+    document.querySelectorAll('#chips .chip').forEach((el,i)=>el.textContent=j.classes[i]);
+    if(j.stock_coco_weights){document.getElementById('model-note').innerHTML='<div class="notice">These are the standard COCO weights, so only people (divers) are reported for underwater use. To detect fish, coral, debris or structures, train on a labelled marine dataset (see the README) and the list above will update automatically.</div>';}
+  }).catch(()=>{document.getElementById('model-state').textContent='Could not reach the AquaVision server.';});
+})();
+</script>
+</body>
+</html>
